@@ -11,25 +11,29 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
+	pb "github.com/brotherlogic/datastore/proto"
 	pbg "github.com/brotherlogic/goserver/proto"
 )
 
 //Server main server type
 type Server struct {
 	*goserver.GoServer
+	basepath     string
+	testingfails bool
 }
 
 // Init builds the server
 func Init() *Server {
 	s := &Server{
 		GoServer: &goserver.GoServer{},
+		basepath: "/media/keystore/datastore/",
 	}
 	return s
 }
 
 // DoRegister does RPC registration
 func (s *Server) DoRegister(server *grpc.Server) {
-
+	pb.RegisterDatastoreServiceServer(server, s)
 }
 
 // ReportHealth alerts if we're not healthy
