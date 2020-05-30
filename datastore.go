@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"time"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
@@ -69,12 +68,10 @@ func main() {
 	server.PrepServer()
 	server.Register = server
 
-	err := server.RegisterServerV2("datastore", false, false)
+	err := server.RegisterServerV2("datastore", false, true)
 	if err != nil {
 		return
 	}
-
-	server.RegisterRepeatingTask(server.runComputation, "run_computation", time.Second*5)
 
 	fmt.Printf("%v", server.Serve())
 }
