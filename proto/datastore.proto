@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package datastore;
+
+import "github.com/golang/protobuf/ptypes/any/any.proto";
+
+option go_package = "github.com/brotherlogic/datastore/proto";
+
+message ReadRequest {
+  string key = 1;
+}
+
+message ReadResponse {
+  google.protobuf.Any value = 1;
+  int64 version = 2;
+  int64 timestamp = 3;
+}
+
+message WriteRequest {
+  string key = 1;
+  google.protobuf.Any value = 2;
+  int64 fail_if_less_than = 3;
+}
+
+message WriteResponse {
+  int64 new_version = 1;
+}
+
+service DatastoreService {
+  rpc Read (ReadRequest) returns (ReadResponse) {};
+  rpc Write (WriteRequest) returns (WriteResponse) {};
+}
