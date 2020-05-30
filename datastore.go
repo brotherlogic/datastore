@@ -13,6 +13,7 @@ import (
 
 	pb "github.com/brotherlogic/datastore/proto"
 	pbg "github.com/brotherlogic/goserver/proto"
+	"github.com/brotherlogic/goserver/utils"
 )
 
 //Server main server type
@@ -20,13 +21,17 @@ type Server struct {
 	*goserver.GoServer
 	basepath     string
 	testingfails bool
+	fanoutQueue  chan *WriteQueueEntry
+	friends      []string
 }
 
 // Init builds the server
 func Init() *Server {
 	s := &Server{
-		GoServer: &goserver.GoServer{},
-		basepath: "/media/keystore/datastore/",
+		GoServer:    &goserver.GoServer{},
+		basepath:    "/media/keystore/datastore/",
+		fanoutQueue: make(chan *WriteQueueEntry),
+		friends:     make([]string, 0),
 	}
 	return s
 }
@@ -75,6 +80,30 @@ func main() {
 	err := server.RegisterServerV2("datastore", false, true)
 	if err != nil {
 		return
+	}
+
+	//Let our neighbours know about us
+	servers, err := utils.ResolveAll("datastore")
+	if err != nil {
+		fmt.Printf("Error finding friends: %v\n", err)
+		return
+	}
+
+	for _, serv := range servers {
+		conn, err := server.DoDial(serv)
+		if err != nil {
+			fmt.Printf("Error dialling: %v", err)
+			return
+		}
+
+		client := pb.NewDatastoreServiceClient(conn)
+		ctx, cancel := utils.BuildContext("datastore-friend", "datastore")
+		friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: fmt.Sprintf("%v:%v", server.Registry.Identifier, server.Registry.Port)})
+		if err == nil {
+			server.friends = append(server.friends, friend.GetFriend())
+		}
+		cancel()
+		conn.Close()
 	}
 
 	fmt.Printf("%v", server.Serve())
