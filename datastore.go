@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/brotherlogic/goserver"
+	"github.com/brotherlogic/goserver/utils"
 	"github.com/brotherlogic/keystore/client"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
@@ -15,7 +16,6 @@ import (
 
 	pb "github.com/brotherlogic/datastore/proto"
 	pbg "github.com/brotherlogic/goserver/proto"
-	"github.com/brotherlogic/goserver/utils"
 )
 
 var (
@@ -100,32 +100,34 @@ func main() {
 	}
 
 	for _, serv := range servers {
-		conn, err := server.DoDial(serv)
-		if err != nil {
-			fmt.Printf("Error dialling: %v", err)
-			return
-		}
-
-		client := pb.NewDatastoreServiceClient(conn)
-		ctx, cancel := utils.BuildContext("datastore-friend", "datastore")
-		friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: append(server.friends, fmt.Sprintf("%v:%v", server.Registry.Identifier, server.Registry.Port))})
-		if err == nil {
-			for _, fr := range friend.GetFriend() {
-				found := false
-				for _, ffr := range server.friends {
-					if ffr == fr {
-						found = true
-					}
-				}
-				if !found {
-					server.friends = append(server.friends, fr)
-				}
-
+		if serv.Identifier != server.Registry.Identifier {
+			conn, err := server.DoDial(serv)
+			if err != nil {
+				fmt.Printf("Error dialling: %v", err)
+				return
 			}
-			Friends.Set(float64(len(server.friends)))
+
+			client := pb.NewDatastoreServiceClient(conn)
+			ctx, cancel := utils.BuildContext("datastore-friend", "datastore")
+			friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: append(server.friends, fmt.Sprintf("%v:%v", server.Registry.Identifier, server.Registry.Port))})
+			if err == nil {
+				for _, fr := range friend.GetFriend() {
+					found := false
+					for _, ffr := range server.friends {
+						if ffr == fr {
+							found = true
+						}
+					}
+					if !found {
+						server.friends = append(server.friends, fr)
+					}
+
+				}
+				Friends.Set(float64(len(server.friends)))
+			}
+			cancel()
+			conn.Close()
 		}
-		cancel()
-		conn.Close()
 	}
 
 	fmt.Printf("%v", server.Serve())
