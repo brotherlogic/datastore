@@ -77,21 +77,26 @@ func (s *Server) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteResp
 	return &pb.WriteResponse{NewVersion: nversion}, err
 }
 
+func (s *Server) addFriend(friends []string) {
+	for _, infriend := range friends {
+		if infriend != fmt.Sprintf("%v:%v", s.Registry.Identifier, s.Registry.Port) {
+			found := false
+			for _, friend := range s.friends {
+				if friend == infriend {
+					found = true
+				}
+			}
+
+			if !found {
+				s.friends = append(s.friends, infriend)
+			}
+		}
+	}
+}
+
 //Friend befriends another server
 func (s *Server) Friend(ctx context.Context, req *pb.FriendRequest) (*pb.FriendResponse, error) {
 	defer Friends.Set(float64(len(s.friends)))
-	for _, infriend := range req.GetFriend() {
-		found := false
-		for _, friend := range s.friends {
-			if friend == infriend {
-				found = true
-			}
-		}
-
-		if !found {
-			s.friends = append(s.friends, infriend)
-		}
-	}
-
+	s.addFriend(req.GetFriend())
 	return &pb.FriendResponse{Friend: append(s.friends, fmt.Sprintf("%v:%v", s.Registry.Identifier, s.Registry.Port))}, nil
 }

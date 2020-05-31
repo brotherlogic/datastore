@@ -35,6 +35,9 @@ func main() {
 	case "write":
 		res, err := client.Write(ctx, &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: []byte(os.Args[2])}})
 		fmt.Printf("%v -> %v\n", res, err)
+	case "friends":
+		res, err := client.Friend(ctx, &pb.FriendRequest{})
+		fmt.Printf("%v -> %v\n", res, err)
 	}
 
 }

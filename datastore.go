@@ -95,18 +95,7 @@ func (s *Server) validate(ctx context.Context) error {
 			ctx, cancel := utils.BuildContext("datastore-friend", "datastore")
 			friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: append(s.friends, fmt.Sprintf("%v:%v", s.Registry.Identifier, s.Registry.Port))})
 			if err == nil {
-				for _, fr := range friend.GetFriend() {
-					found := false
-					for _, ffr := range s.friends {
-						if ffr == fr {
-							found = true
-						}
-					}
-					if !found {
-						s.friends = append(s.friends, fr)
-					}
-
-				}
+				s.addFriend(friend.GetFriend())
 				Friends.Set(float64(len(s.friends)))
 			}
 			cancel()
