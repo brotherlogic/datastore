@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/goserver/utils"
@@ -29,10 +30,11 @@ var (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	basepath     string
-	testingfails bool
-	fanoutQueue  chan *WriteQueueEntry
-	friends      []string
+	basepath      string
+	testingfails  bool
+	fanoutQueue   chan *WriteQueueEntry
+	friends       []string
+	validateCount int
 }
 
 // Init builds the server
@@ -73,6 +75,49 @@ func (s *Server) GetState() []*pbg.State {
 	}
 }
 
+func (s *Server) validate(ctx context.Context) error {
+	//Let our neighbours know about us
+	servers, err := utils.ResolveAll("datastore")
+	if err != nil {
+		fmt.Printf("Error finding friends: %v\n", err)
+		return err
+	}
+
+	for _, serv := range servers {
+		if serv.Identifier != s.Registry.Identifier {
+			conn, err := s.DoDial(serv)
+			if err != nil {
+				fmt.Printf("Error dialling: %v", err)
+				return err
+			}
+
+			client := pb.NewDatastoreServiceClient(conn)
+			ctx, cancel := utils.BuildContext("datastore-friend", "datastore")
+			friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: append(s.friends, fmt.Sprintf("%v:%v", s.Registry.Identifier, s.Registry.Port))})
+			if err == nil {
+				for _, fr := range friend.GetFriend() {
+					found := false
+					for _, ffr := range s.friends {
+						if ffr == fr {
+							found = true
+						}
+					}
+					if !found {
+						s.friends = append(s.friends, fr)
+					}
+
+				}
+				Friends.Set(float64(len(s.friends)))
+			}
+			cancel()
+			conn.Close()
+		}
+	}
+
+	s.validateCount++
+	return nil
+}
+
 func main() {
 	var quiet = flag.Bool("quiet", false, "Show all output")
 	flag.Parse()
@@ -92,43 +137,7 @@ func main() {
 		return
 	}
 
-	//Let our neighbours know about us
-	servers, err := utils.ResolveAll("datastore")
-	if err != nil {
-		fmt.Printf("Error finding friends: %v\n", err)
-		return
-	}
-
-	for _, serv := range servers {
-		if serv.Identifier != server.Registry.Identifier {
-			conn, err := server.DoDial(serv)
-			if err != nil {
-				fmt.Printf("Error dialling: %v", err)
-				return
-			}
-
-			client := pb.NewDatastoreServiceClient(conn)
-			ctx, cancel := utils.BuildContext("datastore-friend", "datastore")
-			friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: append(server.friends, fmt.Sprintf("%v:%v", server.Registry.Identifier, server.Registry.Port))})
-			if err == nil {
-				for _, fr := range friend.GetFriend() {
-					found := false
-					for _, ffr := range server.friends {
-						if ffr == fr {
-							found = true
-						}
-					}
-					if !found {
-						server.friends = append(server.friends, fr)
-					}
-
-				}
-				Friends.Set(float64(len(server.friends)))
-			}
-			cancel()
-			conn.Close()
-		}
-	}
+	server.RegisterRepeatingTaskNonMaster(server.validate, "validate", time.Minute)
 
 	fmt.Printf("%v", server.Serve())
 }
