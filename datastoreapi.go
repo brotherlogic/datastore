@@ -79,6 +79,7 @@ func (s *Server) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteResp
 
 //Friend befriends another server
 func (s *Server) Friend(ctx context.Context, req *pb.FriendRequest) (*pb.FriendResponse, error) {
+	defer Friends.Set(float64(len(s.friends)))
 	for _, friend := range s.friends {
 		if friend == req.GetFriend() {
 			return &pb.FriendResponse{Friend: fmt.Sprintf("%v:%v", s.Registry.Identifier, s.Registry.Port)}, nil

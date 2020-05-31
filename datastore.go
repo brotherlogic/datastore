@@ -8,12 +8,22 @@ import (
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/keystore/client"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/datastore/proto"
 	pbg "github.com/brotherlogic/goserver/proto"
 	"github.com/brotherlogic/goserver/utils"
+)
+
+var (
+	//Friends - total number of friends
+	Friends = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "datastore_friends",
+		Help: "The number of friends we have",
+	})
 )
 
 //Server main server type
@@ -101,6 +111,7 @@ func main() {
 		friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: fmt.Sprintf("%v:%v", server.Registry.Identifier, server.Registry.Port)})
 		if err == nil {
 			server.friends = append(server.friends, friend.GetFriend())
+			Friends.Set(float64(len(server.friends)))
 		}
 		cancel()
 		conn.Close()
