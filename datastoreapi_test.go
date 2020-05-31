@@ -109,11 +109,11 @@ func TestBadRead(t *testing.T) {
 func TestFriends(t *testing.T) {
 	s := InitTest(true, ".testfriends/")
 
-	grr, err := s.Friend(context.Background(), &pb.FriendRequest{Friend: "hello"})
+	grr, err := s.Friend(context.Background(), &pb.FriendRequest{Friend: []string{"hello"}})
 	if err != nil {
 		t.Fatalf("Bad friend: %v", err)
 	}
-	grr, err = s.Friend(context.Background(), &pb.FriendRequest{Friend: "hello"})
+	grr, err = s.Friend(context.Background(), &pb.FriendRequest{Friend: []string{"hello"}})
 	if err != nil {
 		t.Fatalf("Bad friend: %v", err)
 	}
