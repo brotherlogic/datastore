@@ -27,11 +27,11 @@ message WriteResponse {
 }
 
 message FriendRequest {
-  string friend = 1;
+  repeated string friend = 1;
 }
 
 message FriendResponse {
-  string friend = 1;
+  repeated string friend = 1;
 }
 
 service DatastoreService {

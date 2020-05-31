@@ -108,9 +108,20 @@ func main() {
 
 		client := pb.NewDatastoreServiceClient(conn)
 		ctx, cancel := utils.BuildContext("datastore-friend", "datastore")
-		friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: fmt.Sprintf("%v:%v", server.Registry.Identifier, server.Registry.Port)})
+		friend, err := client.Friend(ctx, &pb.FriendRequest{Friend: append(server.friends, fmt.Sprintf("%v:%v", server.Registry.Identifier, server.Registry.Port))})
 		if err == nil {
-			server.friends = append(server.friends, friend.GetFriend())
+			for _, fr := range friend.GetFriend() {
+				found := false
+				for _, ffr := range server.friends {
+					if ffr == fr {
+						found = true
+					}
+				}
+				if !found {
+					server.friends = append(server.friends, fr)
+				}
+
+			}
 			Friends.Set(float64(len(server.friends)))
 		}
 		cancel()
