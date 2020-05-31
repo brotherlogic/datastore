@@ -76,3 +76,15 @@ func (s *Server) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteResp
 	err = ioutil.WriteFile(npath, req.GetValue().GetValue(), 0644)
 	return &pb.WriteResponse{NewVersion: nversion}, err
 }
+
+//Friend befriends another server
+func (s *Server) Friend(ctx context.Context, req *pb.FriendRequest) (*pb.FriendResponse, error) {
+	for _, friend := range s.friends {
+		if friend == req.GetFriend() {
+			return &pb.FriendResponse{Friend: fmt.Sprintf("%v:%v", s.Registry.Identifier, s.Registry.Port)}, nil
+		}
+	}
+
+	s.friends = append(s.friends, req.GetFriend())
+	return &pb.FriendResponse{Friend: fmt.Sprintf("%v:%v", s.Registry.Identifier, s.Registry.Port)}, nil
+}

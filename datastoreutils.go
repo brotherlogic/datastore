@@ -1,18 +1,48 @@
 package main
 
 import (
-	"fmt"
-	"time"
-
-	"golang.org/x/net/context"
+	pb "github.com/brotherlogic/datastore/proto"
+	"github.com/brotherlogic/goserver/utils"
 )
 
-func (s *Server) runComputation(ctx context.Context) error {
-	t := time.Now()
-	sum := 0
-	for i := 0; i < 10000; i++ {
-		sum += i
+//WriteQueueEntry holds an entry for fanout
+type WriteQueueEntry struct {
+	server       string
+	writeRequest *pb.WriteRequest
+	attempts     int
+	ack          chan<- bool
+}
+
+func (s *Server) fanout(req *pb.WriteRequest) {
+	for _, server := range s.friends {
+		s.fanoutQueue <- &WriteQueueEntry{server: server, writeRequest: req}
 	}
-	s.Log(fmt.Sprintf("Sum is %v -> %v", sum, time.Now().Sub(t).Nanoseconds()/1000000))
-	return nil
+}
+
+func (s *Server) handleFanout() {
+	for {
+		x, ok := <-s.fanoutQueue
+		if !ok {
+			break
+		}
+
+		conn, err := s.BaseDial(x.server)
+		if err != nil {
+			x.attempts++
+			s.fanoutQueue <- x
+		}
+		defer conn.Close()
+
+		client := pb.NewDatastoreServiceClient(conn)
+		ctx, cancel := utils.BuildContext("datastore-fanout", "datastore")
+		defer cancel()
+
+		_, err = client.Write(ctx, x.writeRequest)
+		if err != nil {
+			x.attempts++
+			s.fanoutQueue <- x
+		} else {
+			x.ack <- true
+		}
+	}
 }

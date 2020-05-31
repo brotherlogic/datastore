@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	pb "github.com/brotherlogic/datastore/proto"
+	dpb "github.com/brotherlogic/discovery/proto"
 	google_protobuf "github.com/golang/protobuf/ptypes/any"
 )
 
@@ -16,6 +17,7 @@ func InitTest(remove bool, dir string) *Server {
 	if remove {
 		os.RemoveAll(dir)
 	}
+	s.Registry = &dpb.RegistryEntry{Identifier: "test"}
 	return s
 }
 
@@ -102,4 +104,21 @@ func TestBadRead(t *testing.T) {
 		t.Fatalf("Not Bad read: %v", grr)
 	}
 
+}
+
+func TestFriends(t *testing.T) {
+	s := InitTest(true, ".testfriends/")
+
+	grr, err := s.Friend(context.Background(), &pb.FriendRequest{Friend: "hello"})
+	if err != nil {
+		t.Fatalf("Bad friend: %v", err)
+	}
+	grr, err = s.Friend(context.Background(), &pb.FriendRequest{Friend: "hello"})
+	if err != nil {
+		t.Fatalf("Bad friend: %v", err)
+	}
+
+	if len(grr.GetFriend()) == 0 {
+		t.Errorf("No firend: %v", grr)
+	}
 }

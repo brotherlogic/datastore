@@ -26,7 +26,16 @@ message WriteResponse {
   int64 new_version = 1;
 }
 
+message FriendRequest {
+  string friend = 1;
+}
+
+message FriendResponse {
+  string friend = 1;
+}
+
 service DatastoreService {
   rpc Read (ReadRequest) returns (ReadResponse) {};
   rpc Write (WriteRequest) returns (WriteResponse) {};
+  rpc Friend (FriendRequest) returns (FriendResponse) {};
 }
