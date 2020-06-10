@@ -20,6 +20,7 @@ message WriteRequest {
   string key = 1;
   google.protobuf.Any value = 2;
   int64 fail_if_less_than = 3;
+  int32 fanout_minimum = 4;
 }
 
 message WriteResponse {
@@ -32,6 +33,12 @@ message FriendRequest {
 
 message FriendResponse {
   repeated string friend = 1;
+}
+
+message IndexRequest {}
+
+message IndexResponse {
+  repeated string keys = 1;
 }
 
 service DatastoreService {
