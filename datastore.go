@@ -85,7 +85,7 @@ func (s *Server) validate(ctx context.Context) error {
 
 	for _, serv := range servers {
 		if serv.Identifier != s.Registry.Identifier {
-			conn, err := s.DoDial(serv)
+			conn, err := s.FDial(fmt.Sprintf("%v:%v", serv.Identifier, serv.Port))
 			if err != nil {
 				fmt.Printf("Error dialling: %v", err)
 				return err
