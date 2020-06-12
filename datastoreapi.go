@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc/codes"
@@ -74,6 +75,13 @@ func (s *Server) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteResp
 
 	os.MkdirAll(path, 0777)
 	err = ioutil.WriteFile(npath, req.GetValue().GetValue(), 0644)
+
+	// Fanout the write if needed
+	if req.GetFanoutMinimum() >= 0 {
+		key := fmt.Sprintf("%v", time.Now().UnixNano())
+		s.fanout(req, key, int(req.GetFanoutMinimum()))
+	}
+
 	return &pb.WriteResponse{NewVersion: nversion}, err
 }
 

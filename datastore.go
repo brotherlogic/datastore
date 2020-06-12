@@ -9,7 +9,6 @@ import (
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/goserver/utils"
-	"github.com/brotherlogic/keystore/client"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"golang.org/x/net/context"
@@ -35,6 +34,7 @@ type Server struct {
 	fanoutQueue   chan *WriteQueueEntry
 	friends       []string
 	validateCount int
+	counts        map[string]int
 }
 
 // Init builds the server
@@ -128,7 +128,6 @@ func main() {
 		log.SetOutput(ioutil.Discard)
 	}
 	server := Init()
-	server.GoServer.KSclient = *keystoreclient.GetClient(server.DialMaster)
 	server.PrepServer()
 	server.Register = server
 
