@@ -138,5 +138,8 @@ func main() {
 
 	server.RegisterRepeatingTaskNonMaster(server.validate, "validate", time.Minute)
 
+	// Background run the fanout handler
+	go server.handleFanout()
+
 	fmt.Printf("%v", server.Serve())
 }
