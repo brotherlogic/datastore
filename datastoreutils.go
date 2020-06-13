@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"time"
+
 	pb "github.com/brotherlogic/datastore/proto"
 	"github.com/brotherlogic/goserver/utils"
 	"github.com/prometheus/client_golang/prometheus"
@@ -57,21 +60,23 @@ func (s *Server) handleFanout() {
 			break
 		}
 
-		conn, err := s.BaseDial(x.server)
+		ctx, cancel := utils.ManualContext("datastore-fanout", "datastore", time.Minute, false)
+		defer cancel()
+		conn, err := s.FDial(x.server)
 		if err != nil {
+			s.Log(fmt.Sprintf("Error on dial: %v", err))
 			x.attempts++
 			s.fanoutQueue <- x
 		}
 		defer conn.Close()
 
 		client := pb.NewDatastoreServiceClient(conn)
-		ctx, cancel := utils.BuildContext("datastore-fanout", "datastore")
-		defer cancel()
 
 		// Ensure we don't fanout fanned out writes
 		x.writeRequest.FanoutMinimum = -1
 		_, err = client.Write(ctx, x.writeRequest)
 		if err != nil {
+			s.Log(fmt.Sprintf("Error on write :%v", err))
 			x.attempts++
 			s.fanoutQueue <- x
 		} else {
