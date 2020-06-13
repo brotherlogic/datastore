@@ -4,14 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"github.com/brotherlogic/goserver/utils"
-	"google.golang.org/grpc"
 
 	pb "github.com/brotherlogic/datastore/proto"
 	google_protobuf "github.com/golang/protobuf/ptypes/any"
 
 	//Needed to pull in gzip encoding init
+	"google.golang.org/grpc"
 	_ "google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/resolver"
 )
@@ -21,14 +22,20 @@ func init() {
 }
 
 func main() {
-	conn, err := grpc.Dial("discovery:///datastore", grpc.WithInsecure(), grpc.WithBalancerName("my_pick_first"))
+	all, err := utils.BaseResolveAll("datastore")
+	if err != nil {
+		log.Fatalf("Unable to dial: %v", err)
+	}
+
+	chosen := all[0]
+	fmt.Printf("Writing to %v\n", chosen)
+	conn, err := grpc.Dial(fmt.Sprintf("%v:%v", chosen.Identifier, chosen.Port), grpc.WithInsecure())
 	if err != nil {
 		log.Fatalf("Unable to dial: %v", err)
 	}
 	defer conn.Close()
-
 	client := pb.NewDatastoreServiceClient(conn)
-	ctx, cancel := utils.BuildContext("recordader-cli", "recordadder")
+	ctx, cancel := utils.ManualContext("recordader-cli", "recordadder", time.Minute, false)
 	defer cancel()
 
 	switch os.Args[1] {
