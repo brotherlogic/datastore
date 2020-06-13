@@ -35,7 +35,7 @@ func min(a, b int) int {
 
 func (s *Server) fanout(req *pb.WriteRequest, key string, count int) {
 	rCount := 0
-	ackChan := make(chan bool)
+	ackChan := make(chan bool, 20)
 	for _, server := range s.friends {
 		writeQueue.Set(float64(len(s.fanoutQueue)))
 		s.fanoutQueue <- &WriteQueueEntry{server: server, writeRequest: req, key: key, ack: ackChan}

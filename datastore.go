@@ -41,7 +41,7 @@ func Init() *Server {
 	s := &Server{
 		GoServer:    &goserver.GoServer{},
 		basepath:    "/media/keystore/datastore/",
-		fanoutQueue: make(chan *WriteQueueEntry),
+		fanoutQueue: make(chan *WriteQueueEntry, 100),
 		friends:     make([]string, 0),
 	}
 	return s
