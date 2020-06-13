@@ -59,6 +59,9 @@ func (s *Server) fanout(req *pb.WriteRequest, key string, count int) {
 
 	returnWait.Wait()
 
+	// Ensure that any more deductions don't panic
+	returnWait.Add(100)
+
 	// Background wait for the remaining channels to ack before closing
 	go func() {
 		closeWait.Wait()
