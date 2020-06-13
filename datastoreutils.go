@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	pb "github.com/brotherlogic/datastore/proto"
@@ -41,6 +42,8 @@ func (s *Server) fanout(req *pb.WriteRequest, key string, count int) {
 		s.fanoutQueue <- &WriteQueueEntry{server: server, writeRequest: req, key: key, ack: ackChan}
 	}
 
+	var wg sync.WaitGroup
+	wg.Add(min(count, len(s.friends)))
 	for rCount < min(count, len(s.friends)) {
 		_, ok := <-ackChan
 		s.Log(fmt.Sprintf("Got ACK: %v and %v, %v", rCount, count, len(s.friends)))
@@ -48,9 +51,15 @@ func (s *Server) fanout(req *pb.WriteRequest, key string, count int) {
 			break
 		}
 		rCount++
+		wg.Done()
 	}
 
-	close(ackChan)
+	// Background wait for the remaining channels to ack before closing
+	go func() {
+		wg.Wait()
+		close(ackChan)
+	}()
+
 	return
 }
 
