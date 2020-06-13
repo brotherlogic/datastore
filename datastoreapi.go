@@ -61,6 +61,7 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 
 //Write writes out a key
 func (s *Server) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteResponse, error) {
+	s.Log(fmt.Sprintf("Writing %v with %v", req.GetKey(), req.GetFanoutMinimum()))
 	path, version, err := s.getLatest(req.GetKey())
 	c := status.Convert(err).Code()
 	if (c != codes.NotFound && c != codes.OK) || s.testingfails {
