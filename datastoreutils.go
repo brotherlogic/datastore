@@ -54,9 +54,18 @@ func (s *Server) fanout(req *pb.WriteRequest, key string, count int) {
 		wg.Done()
 	}
 
+	// Background read the remainder of the queue
+	go func() {
+		_, ok := <-ackChan
+		if ok {
+			wg.Done()
+		}
+	}()
+
 	// Background wait for the remaining channels to ack before closing
 	go func() {
 		wg.Wait()
+		s.Log(fmt.Sprintf("Closing the channel with %v and %v", rCount, wg))
 		close(ackChan)
 	}()
 
