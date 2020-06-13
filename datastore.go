@@ -34,7 +34,6 @@ type Server struct {
 	fanoutQueue   chan *WriteQueueEntry
 	friends       []string
 	validateCount int
-	counts        map[string]int
 }
 
 // Init builds the server

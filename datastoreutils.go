@@ -75,7 +75,6 @@ func (s *Server) handleFanout() {
 			x.attempts++
 			s.fanoutQueue <- x
 		} else {
-			s.counts[x.key]++
 			x.ack <- true
 		}
 	}
