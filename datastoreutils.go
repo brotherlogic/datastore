@@ -35,37 +35,33 @@ func min(a, b int) int {
 }
 
 func (s *Server) fanout(req *pb.WriteRequest, key string, count int) {
-	rCount := 0
 	ackChan := make(chan bool, 20)
+	fCount := 0
 	for _, server := range s.friends {
 		writeQueue.Set(float64(len(s.fanoutQueue)))
 		s.fanoutQueue <- &WriteQueueEntry{server: server, writeRequest: req, key: key, ack: ackChan}
+		fCount++
 	}
 
-	var wg sync.WaitGroup
-	wg.Add(min(count, len(s.friends)))
-	for rCount < min(count, len(s.friends)) {
-		_, ok := <-ackChan
-		s.Log(fmt.Sprintf("Got ACK: %v and %v, %v", rCount, count, len(s.friends)))
-		if !ok {
-			break
-		}
-		rCount++
-		wg.Done()
-	}
+	var closeWait sync.WaitGroup
+	var returnWait sync.WaitGroup
+	returnWait.Add(min(count, fCount))
+	closeWait.Add(fCount)
 
-	// Background read the remainder of the queue
+	// Read from the queue
 	go func() {
 		_, ok := <-ackChan
 		if ok {
-			wg.Done()
+			closeWait.Done()
+			returnWait.Done()
 		}
 	}()
 
+	returnWait.Wait()
+
 	// Background wait for the remaining channels to ack before closing
 	go func() {
-		wg.Wait()
-		s.Log(fmt.Sprintf("Closing the channel with %v and %v", rCount, wg))
+		closeWait.Wait()
 		close(ackChan)
 	}()
 
