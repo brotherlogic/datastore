@@ -43,6 +43,7 @@ func (s *Server) fanout(req *pb.WriteRequest, key string, count int) {
 
 	for rCount < min(count, len(s.friends)) {
 		_, ok := <-ackChan
+		s.Log(fmt.Sprintf("Got ACK: %v and %v, %v", rCount, count, len(s.friends)))
 		if !ok {
 			break
 		}
@@ -56,6 +57,7 @@ func (s *Server) fanout(req *pb.WriteRequest, key string, count int) {
 func (s *Server) handleFanout() {
 	for {
 		x, ok := <-s.fanoutQueue
+		s.Log(fmt.Sprintf("Read from queue: %v %v", x, ok))
 		if !ok {
 			break
 		}
