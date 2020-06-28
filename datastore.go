@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"time"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/brotherlogic/goserver/utils"
@@ -135,7 +134,7 @@ func main() {
 		return
 	}
 
-	server.RegisterRepeatingTaskNonMaster(server.validate, "validate", time.Minute)
+	//server.RegisterRepeatingTaskNonMaster(server.validate, "validate", time.Minute)
 
 	// Background run the fanout handler
 	go server.handleFanout()
