@@ -31,6 +31,7 @@ message WriteInternalRequest {
   google.protobuf.Any value = 2;
   int64 timestamp = 3;
   string origin = 4;
+  string destination = 5;
 }
 
 message WriteInternalResponse {}

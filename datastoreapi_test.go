@@ -16,6 +16,7 @@ func InitTest(remove bool, dir string) *Server {
 	s.SkipLog = true
 	s.SkipIssue = true
 	s.basepath = dir
+	s.test = true
 	if remove {
 		os.RemoveAll(dir)
 	}
@@ -168,5 +169,17 @@ func TestBadBaseWrite(t *testing.T) {
 	// Should trigger a bad queue process
 	if s.badQueueProcess != 1 {
 		t.Errorf("Queue was processed fine")
+	}
+}
+
+func TestBadFanoutWrite(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+	s.badFanoutWrite = true
+
+	data := []byte("magic")
+
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: data}})
+	if err == nil {
+		t.Fatalf("Bad write: %v", err)
 	}
 }
