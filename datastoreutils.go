@@ -16,7 +16,10 @@ import (
 
 func (s *Server) writeToDir(ctx context.Context, dir, file string, req *pb.WriteInternalRequest) error {
 	data, err := proto.Marshal(req)
-	if err != nil {
+	if err != nil || s.badMarshal {
+		if s.badMarshal {
+			err = fmt.Errorf("Bad marshal")
+		}
 		return err
 	}
 
@@ -30,7 +33,7 @@ func (s *Server) saveToWriteLog(ctx context.Context, req *pb.WriteInternalReques
 	}
 
 	// Fail the write if the queue if fulll
-	if len(s.writeQueue) > 100 {
+	if len(s.writeQueue) > 99 {
 		return status.Errorf(codes.ResourceExhausted, "The write queue is full")
 	}
 

@@ -5,3 +5,5 @@ datastore
 testing
 *.backup
 datastore_cli/datastore_cli
+
+.test*
