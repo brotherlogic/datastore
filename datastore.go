@@ -37,6 +37,8 @@ type Server struct {
 	badRead         bool
 	badUnmarshal    bool
 	badFanoutWrite  bool
+	badFanoutRead   bool
+	failFanout      bool
 	writeQueue      chan string
 	fanoutQueue     chan string
 	cachedKey       map[string]bool
@@ -82,6 +84,26 @@ func (s *Server) GetState() []*pbg.State {
 	return []*pbg.State{
 		&pbg.State{Key: "magic", Value: int64(13)},
 	}
+}
+
+func (s *Server) fanout(ctx context.Context, req *pb.WriteInternalRequest) error {
+	if s.failFanout {
+		return fmt.Errorf("Failed")
+	}
+
+	if s.test {
+		return nil
+	}
+
+	conn, err := s.FDialSpecificServer(ctx, "datastore", req.GetDestination())
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	client := pb.NewDatastoreInternalServiceClient(conn)
+	_, err = client.WriteInternal(ctx, req)
+	return err
 }
 
 func (s *Server) populateFriends(ctx context.Context) {

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/net/context"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	pb "github.com/brotherlogic/datastore/proto"
+	"github.com/brotherlogic/goserver/utils"
 )
 
 func extractFilename(key string) (string, string) {
@@ -28,8 +30,8 @@ func (s *Server) deleteFile(dir, file string) {
 
 func (s *Server) readFile(dir, file string) (*pb.WriteInternalRequest, error) {
 	data, err := ioutil.ReadFile(s.basepath + dir + file)
-	if err != nil || s.badRead {
-		if s.badRead {
+	if err != nil || s.badRead || (s.badFanoutRead && dir == "internal/fanout/") {
+		if s.badRead || (s.badFanoutRead && dir == "internal/fanout/") {
 			err = fmt.Errorf("Built to fail")
 		}
 		return nil, err
@@ -47,12 +49,39 @@ func (s *Server) readFile(dir, file string) (*pb.WriteInternalRequest, error) {
 	return result, nil
 }
 
+func (s *Server) processFanoutQueue() {
+	for file := range s.fanoutQueue {
+		//Load the file
+		req, err := s.readFile("internal/fanout/", file)
+
+		// Dump the file if we can't read it (it'll get picked up again on the next re-write)
+		if err != nil {
+			s.badQueueProcess++
+			s.RaiseIssue(fmt.Sprintf("Bad file read for %v", file), fmt.Sprintf("Read error: %v", err))
+			continue
+		}
+
+		ctx, cancel := utils.ManualContext("dsfo", "dsfo", time.Second*10, true)
+		err = s.fanout(ctx, req)
+		cancel()
+
+		if err != nil {
+			s.Log(fmt.Sprintf("Unable to fanout the write: %v", err))
+			s.fanoutQueue <- file
+		} else {
+			s.deleteFile("internal/fanout", file)
+		}
+
+		//Don't overload here
+		time.Sleep(time.Second * 10)
+	}
+}
 func (s *Server) processWriteQueue() {
 	for file := range s.writeQueue {
 		//Load the file
 		req, err := s.readFile("internal/towrite/", file)
 
-		// Dump the file if we can't read it (it'll get picked up again on the next re-write
+		// Dump the file if we can't read it (it'll get picked up again on the next re-write)
 		if err != nil {
 			s.badQueueProcess++
 			s.RaiseIssue(fmt.Sprintf("Bad file read for %v", file), fmt.Sprintf("Read error: %v", err))
@@ -60,6 +89,8 @@ func (s *Server) processWriteQueue() {
 		}
 
 		dir, file := extractFilename(req.GetKey())
+
+		// This also suggests some corruption somewhere, so pick it up again on the re-write loop
 		err = s.writeToDir(dir, file, req)
 		if err != nil {
 			s.badQueueProcess++
@@ -70,6 +101,9 @@ func (s *Server) processWriteQueue() {
 		// If we've got here then everything's fine
 		s.deleteFile("internal/towrite/", file)
 		s.cachedKey[req.GetKey()] = true
+
+		// No overload
+		time.Sleep(time.Second * 10)
 	}
 }
 
