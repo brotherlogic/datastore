@@ -26,7 +26,7 @@ func TestReadWrite(t *testing.T) {
 
 	data := []byte("magic")
 
-	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "/testing", Value: &google_protobuf.Any{Value: data}})
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: data}})
 	if err != nil {
 		t.Fatalf("Bad write: %v", err)
 	}
@@ -37,13 +37,24 @@ func TestReadWrite(t *testing.T) {
 
 }
 
+func TestBadKey(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+
+	data := []byte("magic")
+
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "/testing", Value: &google_protobuf.Any{Value: data}})
+	if err == nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+}
+
 func TestBadWrite(t *testing.T) {
 	s := InitTest(true, ".testreadwrite/")
 	s.badWrite = true
 
 	data := []byte("magic")
 
-	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "/testing", Value: &google_protobuf.Any{Value: data}})
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: data}})
 	if err == nil {
 		t.Fatalf("Bad write: %v", err)
 	}
@@ -55,7 +66,7 @@ func TestBadFanout(t *testing.T) {
 
 	data := []byte("magic")
 
-	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "/testing", Value: &google_protobuf.Any{Value: data}})
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: data}})
 	if err == nil {
 		t.Fatalf("Bad write: %v", err)
 	}
