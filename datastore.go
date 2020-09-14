@@ -36,6 +36,7 @@ type Server struct {
 	badRead         bool
 	badUnmarshal    bool
 	writeQueue      chan string
+	cachedKey       map[string]bool
 	badQueueProcess int
 }
 
@@ -45,6 +46,7 @@ func Init() *Server {
 		GoServer:   &goserver.GoServer{},
 		basepath:   "/media/keystore/datastore/",
 		writeQueue: make(chan string, 100),
+		cachedKey:  make(map[string]bool),
 	}
 	return s
 }
@@ -93,6 +95,8 @@ func main() {
 	if err != nil {
 		return
 	}
+
+	go server.processWriteQueue()
 
 	fmt.Printf("%v", server.Serve())
 }

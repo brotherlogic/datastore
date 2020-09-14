@@ -69,6 +69,7 @@ func (s *Server) processWriteQueue() {
 
 		// If we've got here then everything's fine
 		s.deleteFile("internal/towrite/", file)
+		s.cachedKey[req.GetKey()] = true
 	}
 }
 
