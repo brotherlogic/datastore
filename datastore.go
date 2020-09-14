@@ -27,17 +27,19 @@ var (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	basepath  string
-	friends   []string
-	badWrite  bool
-	badFanout bool
+	basepath   string
+	friends    []string
+	badWrite   bool
+	badFanout  bool
+	writeQueue chan string
 }
 
 // Init builds the server
 func Init() *Server {
 	s := &Server{
-		GoServer: &goserver.GoServer{},
-		basepath: "/media/keystore/datastore/",
+		GoServer:   &goserver.GoServer{},
+		basepath:   "/media/keystore/datastore/",
+		writeQueue: make(chan string, 100),
 	}
 	return s
 }
