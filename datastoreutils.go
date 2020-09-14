@@ -75,9 +75,12 @@ func (s *Server) processWriteQueue() {
 
 func (s *Server) writeToDir(dir, file string, req *pb.WriteInternalRequest) error {
 	data, err := proto.Marshal(req)
-	if err != nil || s.badMarshal || (s.badBaseMarshal && !strings.HasPrefix(dir, "internal")) {
-		if s.badMarshal || (s.badBaseMarshal && !strings.HasPrefix(dir, "internal")) {
-			err = fmt.Errorf("Bad marshal")
+	if err != nil ||
+		s.badMarshal ||
+		(s.badBaseMarshal && !strings.HasPrefix(dir, "internal")) ||
+		(s.badFanoutWrite && strings.HasPrefix(dir, "internal/fanout")) {
+		if s.badMarshal || (s.badBaseMarshal && !strings.HasPrefix(dir, "internal")) || s.badFanoutWrite {
+			err = fmt.Errorf("Bad marshal (%v) %v, %v, %v", dir, s.badMarshal, s.badBaseMarshal, s.badFanoutWrite)
 		}
 		return err
 	}
@@ -108,9 +111,36 @@ func (s *Server) saveToWriteLog(ctx context.Context, req *pb.WriteInternalReques
 	return nil
 }
 
+func (s *Server) getFriends(ctx context.Context) []string {
+	if len(s.friends) == 0 {
+		s.populateFriends(ctx)
+	}
+	return s.friends
+}
+
 func (s *Server) saveToFanoutLog(ctx context.Context, req *pb.WriteInternalRequest) error {
 	if s.badFanout {
 		return fmt.Errorf("Nope")
 	}
+
+	// Fail the write if the queue if fulll
+	if len(s.writeQueue) > 99 {
+		return status.Errorf(codes.ResourceExhausted, "The write queue is full")
+	}
+
+	writeLogDir := "internal/fanout/"
+
+	for _, friend := range s.getFriends(ctx) {
+		copy := proto.Clone(req).(*pb.WriteInternalRequest)
+		copy.Destination = friend
+		filename := fmt.Sprintf("%v-%v.%v", strings.Replace(copy.GetKey(), "/", "-", -1), copy.GetDestination(), copy.GetTimestamp())
+		err := s.writeToDir(writeLogDir, filename, copy)
+		if err != nil {
+			return err
+		}
+
+		s.fanoutQueue <- filename
+	}
+
 	return nil
 }

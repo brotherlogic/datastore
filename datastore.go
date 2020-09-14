@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/prometheus/client_golang/prometheus"
@@ -35,18 +36,23 @@ type Server struct {
 	badBaseMarshal  bool
 	badRead         bool
 	badUnmarshal    bool
+	badFanoutWrite  bool
 	writeQueue      chan string
+	fanoutQueue     chan string
 	cachedKey       map[string]bool
 	badQueueProcess int
+	test            bool
 }
 
 // Init builds the server
 func Init() *Server {
 	s := &Server{
-		GoServer:   &goserver.GoServer{},
-		basepath:   "/media/keystore/datastore/",
-		writeQueue: make(chan string, 100),
-		cachedKey:  make(map[string]bool),
+		GoServer:    &goserver.GoServer{},
+		basepath:    "/media/keystore/datastore/",
+		writeQueue:  make(chan string, 100),
+		fanoutQueue: make(chan string, 100),
+		cachedKey:   make(map[string]bool),
+		friends:     make([]string, 0),
 	}
 	return s
 }
@@ -75,6 +81,27 @@ func (s *Server) Mote(ctx context.Context, master bool) error {
 func (s *Server) GetState() []*pbg.State {
 	return []*pbg.State{
 		&pbg.State{Key: "magic", Value: int64(13)},
+	}
+}
+
+func (s *Server) populateFriends(ctx context.Context) {
+	if s.test {
+		s.friends = []string{"test1"}
+		return
+	}
+	vals, _ := s.FFind(ctx, "datastore")
+	for _, server := range vals {
+		elems := strings.Split(server, ":")
+		found := false
+		for _, blah := range s.friends {
+			if blah == elems[0] {
+				found = true
+			}
+		}
+
+		if !found {
+			s.friends = append(s.friends, elems[0])
+		}
 	}
 }
 
