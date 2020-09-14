@@ -62,6 +62,38 @@ func TestReadWrite(t *testing.T) {
 
 }
 
+func TestInternalWriteRead(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+
+	data := []byte("magic")
+
+	_, err := s.WriteInternal(context.Background(), &pb.WriteInternalRequest{Timestamp: time.Now().Unix(), Key: "testing", Value: &google_protobuf.Any{Value: data}})
+	if err != nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+
+	drainQueue(s)
+	drainFanoutQueue(s)
+
+	_, err = s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
+	if err == nil {
+		t.Fatalf("Bad read: %v", err)
+	}
+}
+
+func TestBadInternalWrite(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+	s.badWrite = true
+
+	data := []byte("magic")
+
+	_, err := s.WriteInternal(context.Background(), &pb.WriteInternalRequest{Timestamp: time.Now().Unix(), Key: "testing", Value: &google_protobuf.Any{Value: data}})
+	if err == nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+
+}
+
 func TestMultiWrite(t *testing.T) {
 	s := InitTest(true, ".testreadwrite/")
 

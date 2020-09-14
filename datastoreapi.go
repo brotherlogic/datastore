@@ -41,3 +41,13 @@ func (s *Server) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteResp
 
 	return &pb.WriteResponse{NewVersion: internal.GetTimestamp()}, nil
 }
+
+//WriteInternal is a fanout write
+func (s *Server) WriteInternal(ctx context.Context, req *pb.WriteInternalRequest) (*pb.WriteInternalResponse, error) {
+	err := s.saveToWriteLog(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.WriteInternalResponse{}, nil
+}
