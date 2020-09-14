@@ -12,9 +12,8 @@ message ReadRequest {
  
 message ReadResponse {
   google.protobuf.Any value = 1;
-  int64 version = 2;
-  int64 timestamp = 3;
-  string origin = 4;
+  int64 timestamp = 2;
+  string origin = 3;
 }
 
 message WriteRequest {
