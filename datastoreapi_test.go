@@ -33,6 +33,15 @@ func drainQueue(s *Server) {
 	close(s.writeQueue)
 }
 
+func drainFanoutQueue(s *Server) {
+	//Run the queue to process the write
+	go s.processFanoutQueue()
+	for len(s.fanoutQueue) > 0 {
+		time.Sleep(time.Second)
+	}
+	close(s.fanoutQueue)
+}
+
 func TestReadWrite(t *testing.T) {
 	s := InitTest(true, ".testreadwrite/")
 
@@ -44,6 +53,7 @@ func TestReadWrite(t *testing.T) {
 	}
 
 	drainQueue(s)
+	drainFanoutQueue(s)
 
 	_, err = s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
 	if err == nil {
@@ -182,4 +192,47 @@ func TestBadFanoutWrite(t *testing.T) {
 	if err == nil {
 		t.Fatalf("Bad write: %v", err)
 	}
+}
+
+func TestBadFanoutRead(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+	s.badFanoutRead = true
+
+	data := []byte("magic")
+
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: data}})
+	if err != nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+
+	drainQueue(s)
+	drainFanoutQueue(s)
+
+	if s.badQueueProcess != 1 {
+		t.Errorf("Queue was processed fine")
+	}
+}
+
+func TestBadFanoutSend(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+	s.failFanout = true
+
+	data := []byte("magic")
+
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: data}})
+	if err != nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+
+	// This will continually fail
+	go s.processFanoutQueue()
+
+	time.Sleep(time.Second * 2)
+
+	if len(s.fanoutQueue) == 0 {
+		t.Errorf("Somehow the fanout queue has been processed?")
+	}
+
+	// Trip fail the queue
+	close(s.fanoutQueue)
 }
