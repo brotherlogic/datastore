@@ -55,9 +55,13 @@ func TestReadWrite(t *testing.T) {
 	drainQueue(s)
 	drainFanoutQueue(s)
 
-	_, err = s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
-	if err == nil {
+	resp, err := s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
+	if err != nil {
 		t.Fatalf("Bad read: %v", err)
+	}
+
+	if resp.GetValue().GetValue()[0] != data[0] {
+		t.Errorf("Bad return: %v", resp)
 	}
 
 }
@@ -75,10 +79,15 @@ func TestInternalWriteRead(t *testing.T) {
 	drainQueue(s)
 	drainFanoutQueue(s)
 
-	_, err = s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
-	if err == nil {
+	resp, err := s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
+	if err != nil {
 		t.Fatalf("Bad read: %v", err)
 	}
+
+	if resp.GetValue().GetValue()[0] != data[0] {
+		t.Errorf("Bad return: %v", resp)
+	}
+
 }
 
 func TestBadInternalWrite(t *testing.T) {
@@ -173,6 +182,25 @@ func TestBadRead(t *testing.T) {
 	// Should trigger a bad queue process
 	if s.badQueueProcess != 1 {
 		t.Errorf("Queue was processed fine")
+	}
+}
+
+func TestBadReadOnRead(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+	s.badRead = true
+
+	_, err := s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
+	if err == nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+}
+
+func TestVirginRead(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+
+	val, err := s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
+	if err == nil {
+		t.Fatalf("Bad rad: %v", val)
 	}
 }
 

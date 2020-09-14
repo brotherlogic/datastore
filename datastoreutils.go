@@ -30,10 +30,16 @@ func (s *Server) deleteFile(dir, file string) {
 
 func (s *Server) readFile(dir, file string) (*pb.WriteInternalRequest, error) {
 	data, err := ioutil.ReadFile(s.basepath + dir + file)
+
 	if err != nil || s.badRead || (s.badFanoutRead && dir == "internal/fanout/") {
 		if s.badRead || (s.badFanoutRead && dir == "internal/fanout/") {
 			err = fmt.Errorf("Built to fail")
 		}
+
+		if os.IsNotExist(err) {
+			return nil, status.Errorf(codes.NotFound, err.Error())
+		}
+
 		return nil, err
 	}
 

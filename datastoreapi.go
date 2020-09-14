@@ -6,12 +6,31 @@ import (
 	"time"
 
 	"golang.org/x/net/context"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	pb "github.com/brotherlogic/datastore/proto"
 )
 
 //Read reads out some data
 func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadResponse, error) {
+	dir, file := extractFilename(req.GetKey())
+	resp, err := s.readFile(dir, file)
+
+	code := status.Convert(err)
+	if code.Code() != codes.OK && code.Code() != codes.NotFound {
+		return nil, err
+	}
+
+	//Fast return path - we have the key *and* it's in the cache (i.e. our version is fresh)
+	if code.Code() == codes.OK && s.cachedKey[req.GetKey()] {
+		return &pb.ReadResponse{
+			Value:     resp.GetValue(),
+			Timestamp: resp.GetTimestamp(),
+			Origin:    s.Registry.GetIdentifier(),
+		}, nil
+	}
+
 	return nil, fmt.Errorf("Not implemented yet")
 }
 
