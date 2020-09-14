@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -16,6 +17,11 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 
 //Write writes out a key
 func (s *Server) Write(ctx context.Context, req *pb.WriteRequest) (*pb.WriteResponse, error) {
+	// Keys should not start with a '/'
+	if strings.HasPrefix(req.GetKey(), "/") {
+		return nil, fmt.Errorf("Keys should not start with a backslash: %v", req.GetKey())
+	}
+
 	internal := &pb.WriteInternalRequest{
 		Key:       req.GetKey(),
 		Value:     req.GetValue(),
