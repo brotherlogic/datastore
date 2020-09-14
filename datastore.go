@@ -27,12 +27,16 @@ var (
 //Server main server type
 type Server struct {
 	*goserver.GoServer
-	basepath   string
-	friends    []string
-	badWrite   bool
-	badFanout  bool
-	badMarshal bool
-	writeQueue chan string
+	basepath        string
+	friends         []string
+	badWrite        bool
+	badFanout       bool
+	badMarshal      bool
+	badBaseMarshal  bool
+	badRead         bool
+	badUnmarshal    bool
+	writeQueue      chan string
+	badQueueProcess int
 }
 
 // Init builds the server
