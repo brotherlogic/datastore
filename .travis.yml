@@ -18,4 +18,4 @@ before_install:
 
 script:
 - fgt golint $(find . | grep .go$ | grep -v datastore.pb.go)
-- $HOME/gopath/bin/goveralls -service=travis-ci -ignore=datastore.go,datastoreutils.go -package github.com/brotherlogic/datastore
+- $HOME/gopath/bin/goveralls -service=travis-ci -ignore=datastore.go -package github.com/brotherlogic/datastore

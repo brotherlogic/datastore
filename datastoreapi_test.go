@@ -37,6 +37,22 @@ func TestReadWrite(t *testing.T) {
 
 }
 
+func TestMultiWrite(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+
+	data := []byte("magic")
+
+	var err error
+	for i := 0; i < 200; i++ {
+		_, err = s.Write(context.Background(), &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: data}})
+	}
+
+	// We shouldn't be able to do 200 writes when the fanout isn't running
+	if err == nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+}
+
 func TestBadKey(t *testing.T) {
 	s := InitTest(true, ".testreadwrite/")
 
@@ -51,6 +67,18 @@ func TestBadKey(t *testing.T) {
 func TestBadWrite(t *testing.T) {
 	s := InitTest(true, ".testreadwrite/")
 	s.badWrite = true
+
+	data := []byte("magic")
+
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: data}})
+	if err == nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+}
+
+func TestBadMarshal(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+	s.badMarshal = true
 
 	data := []byte("magic")
 

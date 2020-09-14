@@ -31,6 +31,7 @@ type Server struct {
 	friends    []string
 	badWrite   bool
 	badFanout  bool
+	badMarshal bool
 	writeQueue chan string
 }
 
