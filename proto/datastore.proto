@@ -8,7 +8,7 @@ option go_package = "github.com/brotherlogic/datastore/proto";
 
 message ReadRequest {
   string key = 1;
-    bool no_consensus = 4;
+  int32 consensus = 4;
 }
  
 message ReadResponse {
