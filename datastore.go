@@ -65,6 +65,7 @@ func Init() *Server {
 // DoRegister does RPC registration
 func (s *Server) DoRegister(server *grpc.Server) {
 	pb.RegisterDatastoreServiceServer(server, s)
+	pb.RegisterDatastoreInternalServiceServer(server, s)
 }
 
 // ReportHealth alerts if we're not healthy
@@ -166,6 +167,7 @@ func main() {
 	}
 
 	go server.processWriteQueue()
+	go server.processFanoutQueue()
 
 	fmt.Printf("%v", server.Serve())
 }
