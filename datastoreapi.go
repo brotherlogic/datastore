@@ -13,7 +13,21 @@ import (
 	pb "github.com/brotherlogic/datastore/proto"
 )
 
-func (s *Server) buildConsensus(ctx context.Context, key string) (*pb.ReadResponse, error) {
+func min(a int32, b int) int {
+	if int(a) > b {
+		return b
+	}
+	return int(a)
+}
+
+func max(a int32, b int) int32 {
+	if int(a) < b {
+		return int32(b)
+	}
+	return a
+}
+
+func (s *Server) buildConsensus(ctx context.Context, key string, consensus int32) (*pb.ReadResponse, error) {
 	// Default time to build consensus is 1 minute - but knock one second off of the existing context if it has a timeout
 	newTime := time.Minute
 	deadline, ok := ctx.Deadline()
@@ -25,7 +39,9 @@ func (s *Server) buildConsensus(ctx context.Context, key string) (*pb.ReadRespon
 
 	waitGroup := &sync.WaitGroup{}
 	reads := []*pb.ReadResponse{}
-	for _, friend := range s.getFriends(ctx) {
+	friends := s.getFriends(ctx)
+	for _, friend := range friends[0:min(consensus, len(friends))] {
+		//Only wait for full consensus
 		waitGroup.Add(1)
 		go func() {
 			read, err := s.remoteRead(nctx, friend, key)
@@ -66,7 +82,7 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 	}
 
 	//Fast return path - we have the key *and* it's in the cache (i.e. our version is fresh), or we explicitly asked for the local version
-	if code.Code() == codes.OK && (s.cachedKey[req.GetKey()] || req.GetNoConsensus()) {
+	if code.Code() == codes.OK && (s.cachedKey[req.GetKey()] || req.GetConsensus() == 0) {
 		return &pb.ReadResponse{
 			Value:     resp.GetValue(),
 			Timestamp: resp.GetTimestamp(),
@@ -75,7 +91,7 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 	}
 
 	//Let's get a consensus on the latest
-	return s.buildConsensus(ctx, req.GetKey())
+	return s.buildConsensus(ctx, req.GetKey(), max(req.GetConsensus(), 1))
 }
 
 //Write writes out a key

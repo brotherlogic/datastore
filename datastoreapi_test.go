@@ -199,7 +199,7 @@ func TestVirginRead(t *testing.T) {
 	s := InitTest(true, ".testreadwrite/")
 	s.noConsensus = true
 
-	val, err := s.Read(context.Background(), &pb.ReadRequest{Key: "testing", NoConsensus: true})
+	val, err := s.Read(context.Background(), &pb.ReadRequest{Key: "testing", Consensus: int32(0)})
 	if err == nil {
 		t.Fatalf("Bad rad: %v", val)
 	}
@@ -210,9 +210,9 @@ func TestVirginReadWithConsensus(t *testing.T) {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
 	defer cancel()
-	val, err := s.Read(ctx, &pb.ReadRequest{Key: "testing", NoConsensus: true})
+	val, err := s.Read(ctx, &pb.ReadRequest{Key: "testing", Consensus: int32(0)})
 	if err != nil {
-		t.Fatalf("Bad rad: %v", val)
+		t.Fatalf("Bad rad: %v", err)
 	}
 
 	if val.GetValue().GetValue()[0] != 'm' {

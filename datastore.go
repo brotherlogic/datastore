@@ -124,7 +124,7 @@ func (s *Server) remoteRead(ctx context.Context, dest, key string) (*pb.ReadResp
 	defer conn.Close()
 
 	client := pb.NewDatastoreServiceClient(conn)
-	return client.Read(ctx, &pb.ReadRequest{Key: key, NoConsensus: true})
+	return client.Read(ctx, &pb.ReadRequest{Key: key, Consensus: int32(0)})
 }
 
 func (s *Server) populateFriends(ctx context.Context) {
