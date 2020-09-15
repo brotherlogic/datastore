@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"golang.org/x/net/context"
@@ -11,6 +12,48 @@ import (
 
 	pb "github.com/brotherlogic/datastore/proto"
 )
+
+func (s *Server) buildConsensus(ctx context.Context, key string) (*pb.ReadResponse, error) {
+	// Default time to build consensus is 1 minute - but knock one second off of the existing context if it has a timeout
+	newTime := time.Minute
+	deadline, ok := ctx.Deadline()
+	if ok {
+		newTime = deadline.Sub(time.Now().Add(-time.Second))
+	}
+	nctx, cancel := context.WithTimeout(ctx, newTime)
+	defer cancel()
+
+	waitGroup := &sync.WaitGroup{}
+	reads := []*pb.ReadResponse{}
+	for _, friend := range s.getFriends(ctx) {
+		waitGroup.Add(1)
+		go func() {
+			read, err := s.remoteRead(nctx, friend, key)
+			if err == nil {
+				reads = append(reads, read)
+			}
+			waitGroup.Done()
+		}()
+	}
+
+	//Wait for all to complete (or at least timeout)
+	waitGroup.Wait()
+
+	//Find the best response
+	var best *pb.ReadResponse
+	mTime := int64(0)
+	for _, read := range reads {
+		if read.GetTimestamp() > mTime {
+			mTime = read.GetTimestamp()
+			best = read
+		}
+	}
+
+	if best == nil {
+		return nil, status.Errorf(codes.NotFound, "Could not find %v, even with %v friends", key, len(s.getFriends(ctx)))
+	}
+	return best, nil
+}
 
 //Read reads out some data
 func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadResponse, error) {
@@ -22,8 +65,8 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 		return nil, err
 	}
 
-	//Fast return path - we have the key *and* it's in the cache (i.e. our version is fresh)
-	if code.Code() == codes.OK && s.cachedKey[req.GetKey()] {
+	//Fast return path - we have the key *and* it's in the cache (i.e. our version is fresh), or we explicitly asked for the local version
+	if code.Code() == codes.OK && (s.cachedKey[req.GetKey()] || req.GetNoConsensus()) {
 		return &pb.ReadResponse{
 			Value:     resp.GetValue(),
 			Timestamp: resp.GetTimestamp(),
@@ -31,7 +74,8 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 		}, nil
 	}
 
-	return nil, fmt.Errorf("Not implemented yet")
+	//Let's get a consensus on the latest
+	return s.buildConsensus(ctx, req.GetKey())
 }
 
 //Write writes out a key

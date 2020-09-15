@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/brotherlogic/goserver"
 	"github.com/prometheus/client_golang/prometheus"
@@ -15,6 +16,7 @@ import (
 
 	pb "github.com/brotherlogic/datastore/proto"
 	pbg "github.com/brotherlogic/goserver/proto"
+	google_protobuf "github.com/golang/protobuf/ptypes/any"
 )
 
 var (
@@ -39,6 +41,7 @@ type Server struct {
 	badFanoutWrite  bool
 	badFanoutRead   bool
 	failFanout      bool
+	noConsensus     bool
 	writeQueue      chan string
 	fanoutQueue     chan string
 	cachedKey       map[string]bool
@@ -104,6 +107,23 @@ func (s *Server) fanout(ctx context.Context, req *pb.WriteInternalRequest) error
 	client := pb.NewDatastoreInternalServiceClient(conn)
 	_, err = client.WriteInternal(ctx, req)
 	return err
+}
+
+func (s *Server) remoteRead(ctx context.Context, dest, key string) (*pb.ReadResponse, error) {
+	if s.test {
+		if s.noConsensus {
+			return nil, fmt.Errorf("Not Found")
+		}
+		return &pb.ReadResponse{Timestamp: time.Now().Unix(), Value: &google_protobuf.Any{Value: []byte("magic")}}, nil
+	}
+	conn, err := s.FDialSpecificServer(ctx, "datastore", dest)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := pb.NewDatastoreServiceClient(conn)
+	return client.Read(ctx, &pb.ReadRequest{Key: key, NoConsensus: true})
 }
 
 func (s *Server) populateFriends(ctx context.Context) {

@@ -197,10 +197,26 @@ func TestBadReadOnRead(t *testing.T) {
 
 func TestVirginRead(t *testing.T) {
 	s := InitTest(true, ".testreadwrite/")
+	s.noConsensus = true
 
-	val, err := s.Read(context.Background(), &pb.ReadRequest{Key: "testing"})
+	val, err := s.Read(context.Background(), &pb.ReadRequest{Key: "testing", NoConsensus: true})
 	if err == nil {
 		t.Fatalf("Bad rad: %v", val)
+	}
+}
+
+func TestVirginReadWithConsensus(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
+	defer cancel()
+	val, err := s.Read(ctx, &pb.ReadRequest{Key: "testing", NoConsensus: true})
+	if err != nil {
+		t.Fatalf("Bad rad: %v", val)
+	}
+
+	if val.GetValue().GetValue()[0] != 'm' {
+		t.Errorf("Bad read: %v", val)
 	}
 }
 
