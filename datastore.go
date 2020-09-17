@@ -53,7 +53,7 @@ type Server struct {
 func Init() *Server {
 	s := &Server{
 		GoServer:    &goserver.GoServer{},
-		basepath:    "/media/keystore/datastore/",
+		basepath:    "/media/datastore/",
 		writeQueue:  make(chan string, 100),
 		fanoutQueue: make(chan string, 100),
 		cachedKey:   make(map[string]bool),
