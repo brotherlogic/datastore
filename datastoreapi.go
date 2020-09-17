@@ -27,7 +27,7 @@ func max(a int32, b int) int32 {
 	return a
 }
 
-func (s *Server) buildConsensus(ctx context.Context, key string, consensus int32) (*pb.ReadResponse, error) {
+func (s *Server) buildConsensus(ctx context.Context, key string, consensus int32, save bool) (*pb.ReadResponse, error) {
 	// Default time to build consensus is 1 minute - but knock one second off of the existing context if it has a timeout
 	newTime := time.Minute
 	deadline, ok := ctx.Deadline()
@@ -68,6 +68,19 @@ func (s *Server) buildConsensus(ctx context.Context, key string, consensus int32
 	if best == nil {
 		return nil, status.Errorf(codes.NotFound, "Could not find %v, even with %v friends", key, len(s.getFriends(ctx)))
 	}
+
+	// Save the consensus if we need to
+	if save {
+		// We can save it to the write log without a fanout
+		s.saveToWriteLog(ctx,
+			&pb.WriteInternalRequest{
+				Key:       key,
+				Value:     best.GetValue(),
+				Timestamp: best.GetTimestamp(),
+				Origin:    best.GetOrigin(),
+			})
+	}
+
 	return best, nil
 }
 
@@ -91,7 +104,7 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 	}
 
 	//Let's get a consensus on the latest
-	return s.buildConsensus(ctx, req.GetKey(), max(req.GetConsensus(), 1))
+	return s.buildConsensus(ctx, req.GetKey(), max(req.GetConsensus(), 1), !s.cachedKey[req.GetKey()])
 }
 
 //Write writes out a key
