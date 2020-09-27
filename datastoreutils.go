@@ -75,7 +75,7 @@ func (s *Server) processFanoutQueue() {
 			s.Log(fmt.Sprintf("Unable to fanout the write: %v", err))
 			s.fanoutQueue <- file
 		} else {
-			s.deleteFile("internal/fanout", file)
+			s.deleteFile("internal/fanout/", file)
 		}
 
 		//Don't overload here
