@@ -127,7 +127,7 @@ func (s *Server) writeToDir(dir, file string, req *pb.WriteInternalRequest) erro
 	}
 
 	os.MkdirAll(s.basepath+dir, 0777)
-	return ioutil.WriteFile(s.basepath+dir+file, data, 0644)
+	return ioutil.WriteFile(fmt.Sprintf("%v%v%v", s.basepath, dir, file), data, 0644)
 }
 
 func (s *Server) saveToWriteLog(ctx context.Context, req *pb.WriteInternalRequest) error {
