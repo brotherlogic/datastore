@@ -97,7 +97,7 @@ func (s *Server) processWriteQueue() {
 		dir, file := extractFilename(req.GetKey())
 
 		// This also suggests some corruption somewhere, so pick it up again on the re-write loop
-		err = s.writeToDir(dir, fmt.Sprintf("%v.%v", file, req.GetTimestamp()), req)
+		err = s.writeToDir(dir, fmt.Sprintf("%v.%v", file, req.GetTimestamp()), req, file)
 		if err != nil {
 			s.badQueueProcess++
 			s.RaiseIssue(fmt.Sprintf("Bad write for %v", file), fmt.Sprintf("Write error: %v", err))
@@ -114,7 +114,7 @@ func (s *Server) processWriteQueue() {
 	}
 }
 
-func (s *Server) writeToDir(dir, file string, req *pb.WriteInternalRequest) error {
+func (s *Server) writeToDir(dir, file string, req *pb.WriteInternalRequest, lnfile string) error {
 	data, err := proto.Marshal(req)
 	if err != nil ||
 		s.badMarshal ||
@@ -127,7 +127,11 @@ func (s *Server) writeToDir(dir, file string, req *pb.WriteInternalRequest) erro
 	}
 
 	os.MkdirAll(s.basepath+dir, 0777)
-	return ioutil.WriteFile(fmt.Sprintf("%v%v%v", s.basepath, dir, file), data, 0644)
+	err = ioutil.WriteFile(fmt.Sprintf("%v%v%v", s.basepath, dir, file), data, 0644)
+	if len(lnfile) > 0 && err == nil {
+		err = os.Symlink(fmt.Sprintf("%v", file), fmt.Sprintf("%v%v%v", s.basepath, dir, lnfile))
+	}
+	return err
 }
 
 func (s *Server) saveToWriteLog(ctx context.Context, req *pb.WriteInternalRequest) error {
@@ -142,7 +146,7 @@ func (s *Server) saveToWriteLog(ctx context.Context, req *pb.WriteInternalReques
 
 	writeLogDir := "internal/towrite/"
 	filename := fmt.Sprintf("%v.%v", strings.Replace(req.GetKey(), "/", "-", -1), req.GetTimestamp())
-	err := s.writeToDir(writeLogDir, filename, req)
+	err := s.writeToDir(writeLogDir, filename, req, "")
 	if err != nil {
 		return err
 	}
@@ -175,7 +179,7 @@ func (s *Server) saveToFanoutLog(ctx context.Context, req *pb.WriteInternalReque
 		copy := proto.Clone(req).(*pb.WriteInternalRequest)
 		copy.Destination = friend
 		filename := fmt.Sprintf("%v-%v.%v", strings.Replace(copy.GetKey(), "/", "-", -1), copy.GetDestination(), copy.GetTimestamp())
-		err := s.writeToDir(writeLogDir, filename, copy)
+		err := s.writeToDir(writeLogDir, filename, copy, "")
 		if err != nil {
 			return err
 		}

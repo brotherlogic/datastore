@@ -95,6 +95,7 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 	}
 
 	//Fast return path - we have the key *and* it's in the cache (i.e. our version is fresh), or we explicitly asked for the local version
+	s.Log(fmt.Sprintf("CODE: %v, Cache: %v", code.Code(), s.cachedKey))
 	if code.Code() == codes.OK && (s.cachedKey[req.GetKey()] || req.GetConsensus() == 0) {
 		return &pb.ReadResponse{
 			Value:     resp.GetValue(),
