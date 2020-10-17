@@ -25,7 +25,7 @@ func extractFilename(key string) (string, string) {
 }
 
 func (s *Server) deleteFile(dir, file string) {
-	s.Log(fmt.Sprintf("Removing %v%v -> %v", dir, file, os.Remove(dir+file)))
+	s.Log(fmt.Sprintf("Removing %v%v -> %v", dir, file, os.Remove(s.basepath+dir+file)))
 }
 
 func (s *Server) readFile(dir, file string) (*pb.WriteInternalRequest, error) {
@@ -105,7 +105,8 @@ func (s *Server) processWriteQueue() {
 		}
 
 		// If we've got here then everything's fine
-		s.deleteFile("internal/towrite/", file)
+		filename := fmt.Sprintf("%v.%v", strings.Replace(req.GetKey(), "/", "-", -1), req.GetTimestamp())
+		s.deleteFile("internal/towrite/", filename)
 		s.cachedKey[req.GetKey()] = true
 
 		// No overload
