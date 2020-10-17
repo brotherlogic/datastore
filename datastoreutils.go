@@ -95,9 +95,10 @@ func (s *Server) processWriteQueue() {
 		}
 
 		dir, file := extractFilename(req.GetKey())
+		filename := fmt.Sprintf("%v.%v", strings.Replace(req.GetKey(), "/", "-", -1), req.GetTimestamp())
 
 		// This also suggests some corruption somewhere, so pick it up again on the re-write loop
-		err = s.writeToDir(dir, file, req)
+		err = s.writeToDir(dir, filename, req)
 		if err != nil {
 			s.badQueueProcess++
 			s.RaiseIssue(fmt.Sprintf("Bad write for %v", file), fmt.Sprintf("Write error: %v", err))
@@ -105,7 +106,6 @@ func (s *Server) processWriteQueue() {
 		}
 
 		// If we've got here then everything's fine
-		filename := fmt.Sprintf("%v.%v", strings.Replace(req.GetKey(), "/", "-", -1), req.GetTimestamp())
 		s.deleteFile("internal/towrite/", filename)
 		s.cachedKey[req.GetKey()] = true
 
