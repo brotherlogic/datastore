@@ -40,7 +40,7 @@ func main() {
 
 	switch os.Args[1] {
 	case "write":
-		res, err := client.Write(ctx, &pb.WriteRequest{Key: "testing", Value: &google_protobuf.Any{Value: []byte(os.Args[2])}})
+		res, err := client.Write(ctx, &pb.WriteRequest{Key: os.Args[2], Value: &google_protobuf.Any{Value: []byte(os.Args[3])}})
 		fmt.Printf("%v -> %v\n", res, err)
 	case "read":
 		res, err := client.Read(ctx, &pb.ReadRequest{Key: "testing"})

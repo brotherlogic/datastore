@@ -2,7 +2,9 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
+	"os/exec"
 	"testing"
 	"time"
 
@@ -64,6 +66,38 @@ func TestReadWrite(t *testing.T) {
 		t.Errorf("Bad return: %v", resp)
 	}
 
+}
+
+func TestReadWriteComplexKey(t *testing.T) {
+	s := InitTest(true, ".testreadwrite/")
+
+	data := []byte("magic")
+
+	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "me/myself/and/i", Value: &google_protobuf.Any{Value: data}})
+	if err != nil {
+		t.Fatalf("Bad write: %v", err)
+	}
+
+	drainQueue(s)
+	drainFanoutQueue(s)
+
+	resp, err := s.Read(context.Background(), &pb.ReadRequest{Key: "me/myself/and/i"})
+	if err != nil {
+		t.Fatalf("Bad read: %v", err)
+	}
+
+	if resp.GetValue().GetValue()[0] != data[0] {
+		t.Errorf("Bad return: %v", resp)
+	}
+
+	// Let's verify that the key has been written to the correct location
+	_, err = os.Open(".testreadwrite/me/myself/and/i")
+	if err != nil {
+		t.Errorf("File did not load: %v", err)
+
+		details, err := exec.Command("find", ".testreadwrite/").Output()
+		log.Printf("Find output: %v -> %v", err, string(details))
+	}
 }
 
 func TestInternalWriteRead(t *testing.T) {

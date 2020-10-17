@@ -21,7 +21,7 @@ func extractFilename(key string) (string, string) {
 	if val < 0 {
 		return "", key
 	}
-	return key[0:val], key[val+1:]
+	return key[0 : val+1], key[val+1:]
 }
 
 func (s *Server) deleteFile(dir, file string) {
