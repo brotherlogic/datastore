@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -74,7 +75,7 @@ func TestReadWriteComplexKey(t *testing.T) {
 
 	data := []byte("magic")
 
-	_, err := s.Write(context.Background(), &pb.WriteRequest{Key: "me/myself/and/i", Value: &google_protobuf.Any{Value: data}})
+	r1, err := s.Write(context.Background(), &pb.WriteRequest{Key: "me/myself/and/i", Value: &google_protobuf.Any{Value: data}})
 	if err != nil {
 		t.Fatalf("Bad write: %v", err)
 	}
@@ -92,7 +93,7 @@ func TestReadWriteComplexKey(t *testing.T) {
 	}
 
 	// Let's verify that the key has been written to the correct location
-	_, err = os.Open(".testreadwrite/me/myself/and/i")
+	_, err = os.Open(".testreadwrite/me/myself/and/i." + fmt.Sprintf("%v", r1.GetNewVersion()))
 	if err != nil {
 		t.Errorf("File did not load: %v", err)
 
