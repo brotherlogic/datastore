@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
@@ -97,6 +98,16 @@ func TestReadWriteComplexKey(t *testing.T) {
 
 		details, err := exec.Command("find", ".testreadwrite/").Output()
 		log.Printf("Find output: %v -> %v", err, string(details))
+	}
+
+	// Validate that the internal list is empty
+	files, err := ioutil.ReadDir(".testreadwrite/internal/towrite/")
+	if err != nil {
+		t.Errorf("Bad read of internal write dir")
+	}
+
+	if len(files) != 0 {
+		t.Errorf("There's still files in the internal write dir: %v", files[0].Name())
 	}
 }
 
