@@ -66,7 +66,7 @@ func (s *Server) buildConsensus(ctx context.Context, key string, consensus int32
 	}
 
 	if best == nil {
-		return nil, status.Errorf(codes.NotFound, "Could not find %v, even with %v friends", key, len(s.getFriends(ctx)))
+		return nil, status.Errorf(codes.InvalidArgument, "Could not find %v, even with %v friends", key, len(s.getFriends(ctx)))
 	}
 
 	// Save the consensus if we need to

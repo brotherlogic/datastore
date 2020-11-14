@@ -43,7 +43,7 @@ func main() {
 		res, err := client.Write(ctx, &pb.WriteRequest{Key: os.Args[2], Value: &google_protobuf.Any{Value: []byte(os.Args[3])}})
 		fmt.Printf("%v -> %v\n", res, err)
 	case "read":
-		res, err := client.Read(ctx, &pb.ReadRequest{Key: "testing"})
+		res, err := client.Read(ctx, &pb.ReadRequest{Key: os.Args[2]})
 		fmt.Printf("%v -> %v\n", res, err)
 	}
 
