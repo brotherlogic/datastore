@@ -104,8 +104,13 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 		}, nil
 	}
 
+	// If we're not asking for consensus, return not found
+	if req.GetConsensus() == 0 {
+		return nil, status.Errorf(codes.NotFound, "Could not find %v", req)
+	}
+
 	//Let's get a consensus on the latest
-	return s.buildConsensus(ctx, req.GetKey(), max(req.GetConsensus(), 1), !s.cachedKey[req.GetKey()])
+	return s.buildConsensus(ctx, req.GetKey(), req.GetConsensus(), !s.cachedKey[req.GetKey()])
 }
 
 //Write writes out a key
