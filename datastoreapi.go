@@ -96,7 +96,7 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 
 	//Fast return path - we have the key *and* it's in the cache (i.e. our version is fresh), or we explicitly asked for the local version
 	s.Log(fmt.Sprintf("CODE: %v, Cache: %v", code.Code(), s.cachedKey))
-	if (code.Code() == codes.OK && s.cachedKey[req.GetKey()]) || req.GetConsensus() == 0 {
+	if code.Code() == codes.OK && (s.cachedKey[req.GetKey()] || req.GetConsensus() == 0) {
 		return &pb.ReadResponse{
 			Value:     resp.GetValue(),
 			Timestamp: resp.GetTimestamp(),
@@ -104,8 +104,13 @@ func (s *Server) Read(ctx context.Context, req *pb.ReadRequest) (*pb.ReadRespons
 		}, nil
 	}
 
+	// If we're not asking for consensus, return not found
+	if req.GetConsensus() == 0 {
+		return nil, status.Errorf(codes.NotFound, "Could not find %v", req)
+	}
+
 	//Let's get a consensus on the latest
-	return s.buildConsensus(ctx, req.GetKey(), max(req.GetConsensus(), 1), !s.cachedKey[req.GetKey()])
+	return s.buildConsensus(ctx, req.GetKey(), req.GetConsensus(), !s.cachedKey[req.GetKey()])
 }
 
 //Write writes out a key
