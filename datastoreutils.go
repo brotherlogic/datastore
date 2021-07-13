@@ -67,7 +67,7 @@ func (s *Server) processFanoutQueue() {
 			continue
 		}
 
-		ctx, cancel := utils.ManualContext("dsfo", "dsfo", time.Second*10, true)
+		ctx, cancel := utils.ManualContext("dsfo", time.Second*10)
 		err = s.fanout(ctx, req)
 		cancel()
 

@@ -35,7 +35,7 @@ func main() {
 	}
 	defer conn.Close()
 	client := pb.NewDatastoreServiceClient(conn)
-	ctx, cancel := utils.ManualContext("recordader-cli", "recordadder", time.Minute, false)
+	ctx, cancel := utils.ManualContext("recordader-cli", time.Minute)
 	defer cancel()
 
 	switch os.Args[1] {
