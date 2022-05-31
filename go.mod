@@ -10,7 +10,7 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/prometheus/client_golang v1.12.2
 	golang.org/x/net v0.0.0-20220526153639-5463443f8c37
-	google.golang.org/genproto v0.0.0-20220527130721-00d5c0f3be58 // indirect
+	google.golang.org/genproto v0.0.0-20220531134929-86cf59382f1b // indirect
 	google.golang.org/grpc v1.46.2
 	google.golang.org/protobuf v1.28.0
 )
