@@ -8,7 +8,7 @@ require (
 	github.com/brotherlogic/lock v0.0.0-20220809040209-acd3f5b8829f // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/prometheus/client_golang v1.13.0
-	golang.org/x/net v0.0.0-20220809012201-f428fae20770
+	golang.org/x/net v0.0.0-20220809184613-07c6da5e1ced
 	google.golang.org/grpc v1.48.0
 	google.golang.org/protobuf v1.28.1
 )
