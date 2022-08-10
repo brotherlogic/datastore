@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/brotherlogic/buildserver v0.0.0-20220810154540-c003db2d193b // indirect
 	github.com/brotherlogic/discovery v0.0.0-20220807001338-21d1d2714c5c
-	github.com/brotherlogic/dstore v0.0.0-20220810151024-3a5f3599c38f // indirect
+	github.com/brotherlogic/dstore v0.0.0-20220810192606-0006f7ca449a // indirect
 	github.com/brotherlogic/goserver v0.0.0-20220802151516-4b60a60b3020
 	github.com/brotherlogic/lock v0.0.0-20220809040209-acd3f5b8829f // indirect
 	github.com/golang/protobuf v1.5.2
