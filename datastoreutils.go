@@ -24,8 +24,8 @@ func extractFilename(key string) (string, string) {
 	return key[0 : val+1], key[val+1:]
 }
 
-func (s *Server) deleteFile(dir, file string) {
-	s.Log(fmt.Sprintf("Removing %v%v -> %v", dir, file, os.Remove(s.basepath+dir+file)))
+func (s *Server) deleteFile(ctx context.Context, dir, file string) {
+	s.CtxLog(ctx, fmt.Sprintf("Removing %v%v -> %v", dir, file, os.Remove(s.basepath+dir+file)))
 }
 
 func (s *Server) readFile(dir, file string) (*pb.WriteInternalRequest, error) {
@@ -69,14 +69,14 @@ func (s *Server) processFanoutQueue() {
 
 		ctx, cancel := utils.ManualContext("dsfo", time.Second*10)
 		err = s.fanout(ctx, req)
-		cancel()
 
 		if err != nil {
-			s.Log(fmt.Sprintf("Unable to fanout the write: %v", err))
+			s.CtxLog(ctx, fmt.Sprintf("Unable to fanout the write: %v", err))
 			s.fanoutQueue <- file
 		} else {
-			s.deleteFile("internal/fanout/", file)
+			s.deleteFile(ctx, "internal/fanout/", file)
 		}
+		cancel()
 
 		//Don't overload here
 		time.Sleep(time.Second * 10)
@@ -106,7 +106,9 @@ func (s *Server) processWriteQueue() {
 
 		// If we've got here then everything's fine
 		filename := fmt.Sprintf("%v.%v", strings.Replace(req.GetKey(), "/", "-", -1), req.GetTimestamp())
-		s.deleteFile("internal/towrite/", filename)
+		ctx, cancel := utils.ManualContext("pwq", time.Minute)
+		s.deleteFile(ctx, "internal/towrite/", filename)
+		cancel()
 		s.cachedKey[req.GetKey()] = true
 
 		// No overload
