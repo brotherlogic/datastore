@@ -1,6 +1,6 @@
 module github.com/brotherlogic/datastore
 
-go 1.16
+go 1.17
 
 require (
 	github.com/brotherlogic/discovery v0.0.0-20220817003605-cdc1453b9396
