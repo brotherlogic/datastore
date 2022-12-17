@@ -3,8 +3,8 @@ module github.com/brotherlogic/datastore
 go 1.17
 
 require (
-	github.com/brotherlogic/discovery v0.0.0-20221209181332-1dd8f71c375f
-	github.com/brotherlogic/goserver v0.0.0-20221202193151-b0b39691c212
+	github.com/brotherlogic/discovery v0.0.0-20221217212502-726d61ee9bb5
+	github.com/brotherlogic/goserver v0.0.0-20221217002224-0ba5c0213be1
 	github.com/golang/protobuf v1.5.2
 	github.com/prometheus/client_golang v1.14.0
 	golang.org/x/net v0.4.0
@@ -14,13 +14,13 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/brotherlogic/buildserver v0.0.0-20221209194916-89f292ab28f7 // indirect
-	github.com/brotherlogic/dstore v0.0.0-20221209194838-9d0611d5184d // indirect
-	github.com/brotherlogic/githubcard v0.0.0-20221203201620-54ec2faa3df3 // indirect
-	github.com/brotherlogic/gobuildslave v0.0.0-20221203195227-35931ab7f1a9 // indirect
-	github.com/brotherlogic/keystore v0.0.0-20221203184922-2e64260b58ab // indirect
-	github.com/brotherlogic/lock v0.0.0-20221203202511-04ba5b92ba06 // indirect
-	github.com/brotherlogic/logging v0.0.0-20221203212151-dada6354aca4 // indirect
+	github.com/brotherlogic/buildserver v0.0.0-20221210191743-7420726d38bd // indirect
+	github.com/brotherlogic/dstore v0.0.0-20221217221008-d848823bd824 // indirect
+	github.com/brotherlogic/githubcard v0.0.0-20221211032956-b40a80581d2d // indirect
+	github.com/brotherlogic/gobuildslave v0.0.0-20221217215606-fa3e8547f1dc // indirect
+	github.com/brotherlogic/keystore v0.0.0-20221217211651-161f51e04649 // indirect
+	github.com/brotherlogic/lock v0.0.0-20221211025725-c7b14345e31e // indirect
+	github.com/brotherlogic/logging v0.0.0-20221211023411-3e56b8c66cc1 // indirect
 	github.com/brotherlogic/monitor v0.0.0-20221025152653-c10877c5f9e6 // indirect
 	github.com/brotherlogic/versionserver v0.0.0-20221025154054-c9bcd41be2f2 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
@@ -29,7 +29,7 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mitchellh/go-ps v1.0.0 // indirect
 	github.com/prometheus/client_model v0.3.0 // indirect
-	github.com/prometheus/common v0.38.0 // indirect
+	github.com/prometheus/common v0.39.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	github.com/struCoder/pidusage v0.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.37.0 // indirect
