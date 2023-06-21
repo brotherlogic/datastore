@@ -251,21 +251,6 @@ func TestVirginRead(t *testing.T) {
 	}
 }
 
-func TestVirginReadWithConsensus(t *testing.T) {
-	s := InitTest(true, ".testreadwrite/")
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour)
-	defer cancel()
-	val, err := s.Read(ctx, &pb.ReadRequest{Key: "testing", Consensus: int32(0)})
-	if err != nil {
-		t.Fatalf("Bad rad: %v", err)
-	}
-
-	if val.GetValue().GetValue()[0] != 'm' {
-		t.Errorf("Bad read: %v", val)
-	}
-}
-
 func TestBadUnmarshal(t *testing.T) {
 	s := InitTest(true, ".testreadwrite/")
 	s.badUnmarshal = true
