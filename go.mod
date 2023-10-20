@@ -3,7 +3,7 @@ module github.com/brotherlogic/datastore
 go 1.18
 
 require (
-	github.com/brotherlogic/discovery v0.0.0-20231020035437-aecf5e943b36
+	github.com/brotherlogic/discovery v0.0.0-20231020050942-159586f3e082
 	github.com/brotherlogic/goserver v0.0.0-20230726200050-779ae6811580
 	github.com/golang/protobuf v1.5.3
 	github.com/prometheus/client_golang v1.17.0
@@ -14,7 +14,7 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/brotherlogic/buildserver v0.0.0-20231011232021-442a81f2eaab // indirect
+	github.com/brotherlogic/buildserver v0.0.0-20231020044640-29ec8a8905f7 // indirect
 	github.com/brotherlogic/dstore v0.0.0-20231020041132-a9b977096542 // indirect
 	github.com/brotherlogic/githubcard v0.0.0-20231020023837-d082f48b425b // indirect
 	github.com/brotherlogic/gobuildslave v0.0.0-20231020041201-2449c424b596 // indirect
