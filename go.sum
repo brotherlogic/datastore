@@ -1226,6 +1226,7 @@ github.com/ajstarks/svgo v0.0.0-20180226025133-644b8db467af/go.mod h1:K08gAheRH3
 github.com/ajstarks/svgo v0.0.0-20211024235047-1546f124cd8b/go.mod h1:1KcenG0jGWcpt8ov532z81sp/kMMUG485J2InIOyADM=
 github.com/alecthomas/kingpin/v2 v2.3.1/go.mod h1:oYL5vtsvEHZGHxU7DMp32Dvx+qL+ptGn6lWaot2vCNE=
 github.com/alecthomas/kingpin/v2 v2.3.2/go.mod h1:0gyi0zQnjuFk8xrkNKamJoyUo382HRL7ATRpFZCw6tE=
+github.com/alecthomas/kingpin/v2 v2.4.0/go.mod h1:0gyi0zQnjuFk8xrkNKamJoyUo382HRL7ATRpFZCw6tE=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/units v0.0.0-20151022065526-2efee857e7cf/go.mod h1:ybxpYRFXyAe+OPACYpWeL0wqObRcbAqCMya13uyzqw0=
@@ -1644,6 +1645,7 @@ github.com/brotherlogic/datastore v0.0.0-20231225063314-29a3a3256fd1/go.mod h1:z
 github.com/brotherlogic/datastore v0.0.0-20240101083211-d8249419b204/go.mod h1:iNI/d9Z9tl4U0GZo/lG1CRW2hHAji2nbpgdYJxH3yZw=
 github.com/brotherlogic/datastore v0.0.0-20240108092355-13c3451e9f3b/go.mod h1:LttSjOCdECCSm5DaMSzGNYTY7fdvpaUn6A4SC/VuJ5s=
 github.com/brotherlogic/datastore v0.0.0-20240109071833-5e64a9e829aa/go.mod h1:DzEzRIFj/jO9+o2AY73nzRDJp59Tiq5WrnyaUif039I=
+github.com/brotherlogic/datastore v0.0.0-20240115100013-e0bf6637774f/go.mod h1:afGJWv5lMgFSDBma6d+sdnlr2erdR5gG/jK8D3lKuJI=
 github.com/brotherlogic/discovery v0.0.0-20200925011539-74a8dc203ba4/go.mod h1:W9XhDhsvBgeIgnOKgcWmtFilO549fuIhRMlVHiXAC9k=
 github.com/brotherlogic/discovery v0.0.0-20210531005423-1d609c4f6278/go.mod h1:W9XhDhsvBgeIgnOKgcWmtFilO549fuIhRMlVHiXAC9k=
 github.com/brotherlogic/discovery v0.0.0-20210603130245-be477d62024e/go.mod h1:W9XhDhsvBgeIgnOKgcWmtFilO549fuIhRMlVHiXAC9k=
@@ -2116,6 +2118,7 @@ github.com/brotherlogic/filecopier v0.0.0-20230927071912-7670fa0c90d3/go.mod h1:
 github.com/brotherlogic/filecopier v0.0.0-20231019041158-800bd45c78ce/go.mod h1:b62748IZTftTrtcn2gKqesh/HP5Cu4L0ZXsxAYFwXPg=
 github.com/brotherlogic/filecopier v0.0.0-20231230215555-301c239e0bdc/go.mod h1:J+PSuUEFqdUQ1HsNk4euuZjzIoO0WCFapGO+0IqPcy8=
 github.com/brotherlogic/filecopier v0.0.0-20240106215822-16d39a0eadc6/go.mod h1:4nn5wXhz3SuarR7l9w64/0fRubhqAPN6j6+YpazfEq8=
+github.com/brotherlogic/filecopier v0.0.0-20240113222544-e7667444a538/go.mod h1:gZdfESEnDiGBihC5bioipCJTe3C2sZxE6lM2rekOQrE=
 github.com/brotherlogic/frametracker v0.0.0-20210108214332-61d86ee8f701/go.mod h1:21Eaa47nKHk1Ab77YyOhBdQ6cxKMvKf+9x96UL0wnhs=
 github.com/brotherlogic/frametracker v0.0.0-20220308202045-6632250e217e/go.mod h1:l52l94odEuoKaFmZxFUQ6A+p/AMD0KRY+J4E2V8mwyY=
 github.com/brotherlogic/frametracker v0.0.0-20220514055242-c87e03b44946/go.mod h1:9wXLjwHIBgssdHeWSzgcejaqu08Vmo1i2/Rk4fJ/Kxg=
@@ -2889,8 +2892,9 @@ github.com/brotherlogic/lock v0.0.0-20231211120744-13cc411ff5ed/go.mod h1:afPYp5
 github.com/brotherlogic/lock v0.0.0-20231218151623-d5196f3c214f/go.mod h1:kvmiUKJaE7pmTHN3SVdkZaSemVORfN74+jdusJ54xc0=
 github.com/brotherlogic/lock v0.0.0-20231225153604-1c663588651c/go.mod h1:v4auKz03Io4OIyiG5QOgbNuzP0pUD5oCRmh8kdPQjBQ=
 github.com/brotherlogic/lock v0.0.0-20240101163810-1744f7d3c135/go.mod h1:e1uJ7UsLhwZ6jpozmAF5c1DRum8Gkq0kC3pJ017gLKA=
-github.com/brotherlogic/lock v0.0.0-20240108165158-62a3b34ccc21 h1:FXjwcAOVnzNVIi5ku+Tudfvlnws9XQ/I3eKbeh2cxWI=
 github.com/brotherlogic/lock v0.0.0-20240108165158-62a3b34ccc21/go.mod h1:gkdUT9ucYH9Tf//JsUMN241Qox/uRqJ1uunpLxvmIBA=
+github.com/brotherlogic/lock v0.0.0-20240115172504-71f29ba3b898 h1:aJlEbrmL/t7jYb/UrcADKm9jRULSdFYd4nYOJnpSmxw=
+github.com/brotherlogic/lock v0.0.0-20240115172504-71f29ba3b898/go.mod h1:EqxEEuwbOFIDIbcbTXNH3L5WRumuFc0+NQPu8vXP1W8=
 github.com/brotherlogic/logging v0.0.0-20200903150238-67a07e215efe/go.mod h1:cHEM7v1fl8VwwyN4qcrh8hQHR+XNT+xHI4+yOr4l8Wg=
 github.com/brotherlogic/logging v0.0.0-20210606012857-db059830d1dc/go.mod h1:FOXFywySb2dOOhsEFIwxniCxGJltgA395Dhzp2lFXYI=
 github.com/brotherlogic/logging v0.0.0-20210609015032-e6d0ef792137/go.mod h1:FOXFywySb2dOOhsEFIwxniCxGJltgA395Dhzp2lFXYI=
