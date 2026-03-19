@@ -1,15 +1,15 @@
 module github.com/brotherlogic/datastore
 
-go 1.23.2
+go 1.24.0
 
 require (
 	github.com/brotherlogic/discovery v0.0.0-20250608201506-e686efc28446
 	github.com/brotherlogic/goserver v0.0.0-20250608182006-4ace595931a5
 	github.com/golang/protobuf v1.5.4
 	github.com/prometheus/client_golang v1.22.0
-	golang.org/x/net v0.41.0
-	google.golang.org/grpc v1.73.0
-	google.golang.org/protobuf v1.36.6
+	golang.org/x/net v0.48.0
+	google.golang.org/grpc v1.79.3
+	google.golang.org/protobuf v1.36.10
 )
 
 require (
@@ -31,7 +31,7 @@ require (
 	github.com/prometheus/common v0.64.0 // indirect
 	github.com/prometheus/procfs v0.16.1 // indirect
 	github.com/struCoder/pidusage v0.2.1 // indirect
-	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/text v0.26.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250603155806-513f23925822 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
 )
